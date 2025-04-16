@@ -1,0 +1,9 @@
+architecture: replicaset
+replicaCount: 2
+persistence:
+  enabled: false
+auth:
+  enabled: true
+  rootPassword: "helloworld"
+service:
+  type: ClusterIP
