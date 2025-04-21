@@ -1,0 +1,11 @@
+environment: prod
+# Image settings
+image:
+  repository: nginx
+  tag: "latest"
+# Ingress settings
+ingress:
+  host: example.com
+  tlsSecrets:
+    prod: my-prod-tls-secret
+    staging: my-staging-tls-secret  

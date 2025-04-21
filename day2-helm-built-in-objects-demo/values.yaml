@@ -1,0 +1,22 @@
+backend:
+  enabled: true
+  appName: car-rental-backend
+  replicaCount: 3
+  env: prod
+  containerPort: 8080
+  image:
+    repository: my-ecr-repo/backend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  resources:
+    enabled: true
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+rds:
+  externalEndpoint: car-rental-rds-instance.cr2a444ug1c4.us-east-2.rds.amazonaws.com
+mongodb:
+  replicaCount: 3

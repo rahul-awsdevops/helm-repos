@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  annotations:
+    environment: {{ .Values.environment | quote }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-app
+    spec:
+      containers:
+      - name: app
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+        {{- if eq .Values.environment "prod" }}
+          - name: LOG_LEVEL
+            value: "ERROR"
+        {{- else }}
+          - name: LOG_LEVEL
+            value: "DEBUG"
+        {{- end }}

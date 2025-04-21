@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  annotations:
+    environment: {{ .Values.environment | quote }}
+data:
+  mode: {{- if eq .Values.environment "prod" }}
+    strict
+  {{- else }}
+    debug
+  {{- end }}

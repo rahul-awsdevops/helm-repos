@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: {{ .Release.Name }}-config
+data:
+ app_name: {{ .Values.appName | default "car-rental" }}
+ release_name: {{ .Release.Name }}
+ chart_name: {{ .Chart.Name }}
+ chart_version: {{ .Chart.Version }}

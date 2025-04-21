@@ -1,0 +1,9 @@
+apiVersion: v2
+name: car-rental-apps-helm-charts
+description: Helm chart for the car rental app
+version: 0.1.0
+appVersion: 1.0.0
+dependencies:
+- name: mongodb
+  version: 13.9.0
+  repository: https://charts.bitnami.com/bitnami

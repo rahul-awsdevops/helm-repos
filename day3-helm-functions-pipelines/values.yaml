@@ -1,0 +1,10 @@
+configData: |
+  server:
+    port: 8080
+  database:
+    host: localhost
+envVars: |
+  - name: APP_NAME
+    value: my-app
+  - name: PORT
+    value: "8080"    

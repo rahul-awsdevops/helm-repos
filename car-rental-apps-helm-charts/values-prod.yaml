@@ -1,0 +1,2 @@
+rds:
+  externalEndpoint: car-rental-prod-db.xxxx.us-east-1.rds.amazonaws.com

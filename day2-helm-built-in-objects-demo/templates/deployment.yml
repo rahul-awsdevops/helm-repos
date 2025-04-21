@@ -1,0 +1,90 @@
+# Deployment for the car rental app backend, using all Helm built-in objects
+{{- if .Values.backend.enabled }}
+apiVersion: {{ if semverCompare ">=1.19.0" .Capabilities.KubeVersion.Version }}apps/v1{{ else }}apps/v1beta1{{ end }}
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # .Chart: Add chart metadata for observability
+    chart: {{ .Chart.Name }}
+    chart_version: {{ .Chart.Version }}
+    app_version: {{ .Chart.AppVersion | default "unknown" | quote }}
+    # .Template: Track the template file for debugging
+    template_source: {{ .Template.Name }}
+    # .Release: Include release metadata
+    release_revision: {{ .Release.Revision | quote }}
+    is_install: {{ .Release.IsInstall | quote }}
+    is_upgrade: {{ .Release.IsUpgrade | quote }}
+  labels:
+    app: {{ .Values.backend.appName | default "car-rental-backend" }}
+    release: {{ .Release.Name }}
+spec:
+  {{- if .Values.backend.replicaCount }}
+  replicas: {{ .Values.backend.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.appName | default "car-rental-backend" }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.backend.appName | default "car-rental-backend" }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Values.backend.appName | default "car-rental-backend" }}
+        image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy | default "IfNotPresent" }}
+        ports:
+        - containerPort: {{ .Values.backend.containerPort | default 8080 }}
+        env:
+          # .Values: Configure app-specific settings
+          - name: APP_NAME
+            value: {{ .Values.backend.appName | default "car-rental-backend" | quote }}
+          - name: ENVIRONMENT
+            value: {{ .Values.backend.env | default "dev" | quote }}
+          # .Release: Pass release metadata to the app
+          - name: RELEASE_NAME
+            value: {{ .Release.Name | quote }}
+          - name: RELEASE_NAMESPACE
+            value: {{ .Release.Namespace | quote }}
+          # .Subcharts: Reference MongoDB subchart configuration
+          - name: MONGODB_HOST
+            value: {{ .Release.Name }}-mongodb
+          - name: MONGODB_REPLICAS
+            value: {{ .Values.mongodb.replicaCount | default 1 | quote }}
+          # .Values: RDS endpoint from values.yaml
+          - name: RDS_HOST
+            value: {{ .Values.rds.externalEndpoint | quote }}
+        # .Files: Mount a static configuration file
+        volumeMounts:
+        - name: config
+          mountPath: /app/config/backend-config.yaml
+          subPath: backend-config.yaml
+        resources:
+          {{- if .Values.backend.resources.enabled }}
+          limits:
+            cpu: {{ .Values.backend.resources.limits.cpu | default "500m" | quote }}
+            memory: {{ .Values.backend.resources.limits.memory | default "512Mi" | quote }}
+          requests:
+            cpu: {{ .Values.backend.resources.requests.cpu | default "200m" | quote }}
+            memory: {{ .Values.backend.resources.requests.memory | default "256Mi" | quote }}
+          {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-backend-config
+          items:
+          - key: backend-config.yaml
+            path: backend-config.yaml
+---
+# ConfigMap to store the static file from .Files
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-backend-config
+data:
+  backend-config.yaml: {{ .Files.Get "backend-config.yaml" | quote }}
+{{- end }}

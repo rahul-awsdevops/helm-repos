@@ -1,0 +1,3 @@
+api:
+  timeout: 30s
+  logLevel: debug
